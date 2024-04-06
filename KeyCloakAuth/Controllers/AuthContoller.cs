@@ -11,21 +11,44 @@ using Microsoft.AspNetCore.Authorization;
 namespace KeyCloakAuth.Controllers;
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController : ControllerBase
+public class AuthController(IKeycloakUserManagement cloak) : ControllerBase
 {
+
     [HttpPost("token")]
     public async Task<IActionResult> GetToken(string username, string password)
     {
         var x = new CustomKeyCloak();
-        
-        return Ok(await x.GetTokenAsync(username, password));
+        var token = await x.GetTokenAsync(username, password);
+        return Ok(token);
+    }
+
+    
+    [HttpGet("user")]
+    public async Task<IActionResult> GetUser(string username)
+    {
+        var x = new CustomKeyCloak();
+        var z = await cloak.GetUserProfileAsync(username);
+        return Ok(z);
     }
     [HttpGet("")]
-    [Authorize(Roles ="admin")]
+    [Authorize]
     public IActionResult GetUser()
     {
-        ClaimsPrincipal user = this.User;
+        List<Claim> roleClaims = HttpContext.User.FindAll(ClaimTypes.Role).ToList();
 
+        ClaimsPrincipal user = this.User;
+        var roles = new List<string>();
+
+        foreach (var role in roleClaims)
+        {
+            roles.Add(role.Value);
+        }
         return Ok(user.Identity.Name);
+    }
+    [HttpGet("test")]
+    [Authorize(Roles = "admin")]
+    public IActionResult Test()
+    {
+        return Ok("Has Role");
     }
 }

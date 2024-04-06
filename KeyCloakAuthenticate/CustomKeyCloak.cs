@@ -26,7 +26,7 @@ namespace KeyCloakAuthenticate;
                 //var content =  await response.Content.ReadAsStringAsync();
                 var jsonString = await response.Content.ReadAsStringAsync();
                 var data = JsonConvert.DeserializeObject<AuthTokenResponse>(jsonString);
-                string accessToken = data.access_token;
+                string accessToken = "Bearer " +  data.access_token;
                     return accessToken;
                 }
             else
