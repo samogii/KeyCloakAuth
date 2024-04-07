@@ -16,6 +16,7 @@ namespace KeyCloakAuth.Handler
     {
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, KeycloakRoleRequirement requirement)
         {
+            context.User.FindAll(c => c.Type == ClaimTypes.Role).ToList();
             if (context.User != null && context.User.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == requirement.Role))
             {
                 context.Succeed(requirement);

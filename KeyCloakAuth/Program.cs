@@ -1,15 +1,13 @@
 using Keycloak.AuthServices.Authentication;
 using Keycloak.AuthServices.Authorization;
 using KeyCloakAuth.Handler;
-using KeyCloakAuth.Middleware;
 using KeyCloakAuthenticate;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 
 namespace KeyCloakAuth
 {
@@ -17,22 +15,19 @@ namespace KeyCloakAuth
     {
         public static void Main(string[] args)
         {
+
             var builder = WebApplication.CreateBuilder(args);
             var services = builder.Services;
             var Config = builder.Configuration;
+            JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
+            
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
             services.AddKeycloakAuthentication(Config);
-            services.AddAuthorization();
-            services.AddKeycloakAuthorization(Config);
-            services.AddSingleton<IKeycloakUserManagement, KeycloakUserManagement>();
+            
 
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy("manage-account", policy => policy.RequireClaim("roles", "manage-account"));
-            });
+            services.AddSingleton<IKeycloakUserManagement, KeycloakUserManagement>();
 
             builder.Services.AddSwaggerGen(x =>
             {
@@ -41,7 +36,7 @@ namespace KeyCloakAuth
                 {
                     Description = "JWT Authorization header using the Bearer scheme.",
                     Name = "Authorization",
-                    In = ParameterLocation.Header, 
+                    In = ParameterLocation.Header,
                     Type = SecuritySchemeType.ApiKey,
                     Scheme = "Bearer "
                 });
@@ -57,7 +52,7 @@ namespace KeyCloakAuth
                     },
                     Scheme = "oauth2",
                     Name = "Bearer ",
-                    
+
                     In = ParameterLocation.Header
                 },
                 new List<string>()
@@ -73,18 +68,10 @@ namespace KeyCloakAuth
                 app.UseSwaggerUI();
             }
             
-
-            //app.UseHttpsRedirection();
             app.UseAuthentication();
-            app.UseMiddleware<RoleClaimMiddleware>();
             app.UseAuthorization();
             
-
             app.MapControllers();
-            app.MapGet("/", (ClaimsPrincipal user) =>
-            {
-                app.Logger.LogInformation(user.Identity.Name);
-            }).RequireAuthorization("admin");
 
 
             app.Run();
