@@ -19,7 +19,7 @@ namespace KeyCloakAuthenticate;
             new KeyValuePair<string, string>("client_secret", "BtQCva2tqU4VipO52ioFS338AGCZqX0T")
         });
 
-                var response = await client.PostAsync("http://87.248.139.125:8080/realms/myapp/protocol/openid-connect/token", requestData);
+                var response = await client.PostAsync("https://server.easyportal.dev:8443/realms/myapp/protocol/openid-connect/token", requestData);
 
                 if (response.IsSuccessStatusCode)
                 {

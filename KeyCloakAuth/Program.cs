@@ -1,13 +1,7 @@
 using Keycloak.AuthServices.Authentication;
-using Keycloak.AuthServices.Authorization;
-using KeyCloakAuth.Handler;
 using KeyCloakAuthenticate;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.IdentityModel.Tokens.Jwt;
-using System.Text;
 
 namespace KeyCloakAuth
 {
@@ -20,12 +14,12 @@ namespace KeyCloakAuth
             var services = builder.Services;
             var Config = builder.Configuration;
             JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
-            
+
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             services.AddKeycloakAuthentication(Config);
-            
+
 
             services.AddSingleton<IKeycloakUserManagement, KeycloakUserManagement>();
 
@@ -67,10 +61,10 @@ namespace KeyCloakAuth
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-            
+
             app.UseAuthentication();
             app.UseAuthorization();
-            
+
             app.MapControllers();
 
 
